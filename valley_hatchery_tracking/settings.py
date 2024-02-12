@@ -51,6 +51,25 @@ INSTALLED_APPS = [
     "corsheaders",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://vhtrackingbackend.visionarytechsolution.com'
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "https://example.com",
+    "https://sub.example.com",
+    "http://localhost:3000",
+    "http://127.0.0.1:8000",
+    "https://vhtracking-frontend.vercel.app",
+    "https://vhtracking.com",
+    "http://vhtracking.visionarytechsolution.com",
+]
+ALLOWED_HOSTS = ['*']
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+
+
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
