@@ -128,11 +128,11 @@ def trackOrder(request):
     tracking = qs.first()
     trackingId = tracking.tracking_number
     blacklist = BlackListed.objects.all()
-    print(trackingId)
+    # print(trackingId)
     blacklisted_word = [{'word': q.word, 'replace_word': q.replace_word } for q in blacklist]
     print("Enter APi")
     track = TrackAPI()
-    print("Out From APi ", track)
+    # print("Out From APi ", track)
     tracking_all_details = track.TrackingOrder(trackingId)
     tracking_status = tracking_all_details['status']
     # Create a regular expression pattern from the dictionary keys
