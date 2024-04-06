@@ -10,12 +10,28 @@ from tracking_api.serializers import (BlacklistedSerializer,
                                       TrackingSerializer,
                                       TrackingStatusSerializer)
 from tracking_api.trackingProduct import TrackAPI
+import pandas as pd
+
+
+def create_track_dataset(file_path):
+    data = pd.read_excel(file_path)
+    for index, row in data.iterrows():
+      TrackingNum = row['TrackingNum']
+      OrderNumber = row['OrderNumber']
+      Tracking.objects.create(
+          tracking_number = TrackingNum,
+        order_number = OrderNumber,
+      )
+    return True
+
+
 
 
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def CreateTracking(request):
     data = request.data
+    print(request.user)
     trackCreate = Tracking.objects.create(
         tracking_number = data['tracking_number'],
         order_number = data['order_number'],
@@ -33,7 +49,7 @@ def getAllTracking(request):
     return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
-# @permission_classes([IsAdminUser])
+@permission_classes([IsAdminUser])
 def getSingleTracking(request, tracking_id):
     track = Tracking.objects.get(_id=tracking_id)
     serializer = TrackingSerializer(track, many=False)
@@ -62,6 +78,26 @@ def deletetracking(request, tracking_id):
         return Response({"message": "Track not exits"}, status=status.HTTP_404_NOT_FOUND)
     track.delete()
     return Response({"message": "Track Deleted"}, status=status.HTTP_200_OK)
+
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def deletetracking_list(request):
+    data = request.data
+    user = request.user
+    print(user)
+    if 'track_data_list' not in request.data:
+        return Response({"error": "Please Enter Trackdata"}, status= status.HTTP_400_BAD_REQUEST)
+    track_data = data['track_data_list']
+    if len(track_data) > 0:
+        for tracking_id in track_data:
+            qs = Tracking.objects.filter(_id = tracking_id)
+            track = qs.first()
+            track.delete()
+            print("Delete")
+
+    return Response({"message": "Delete Successfully "}, status=status.HTTP_200_OK)
 
 
 
@@ -165,4 +201,22 @@ def trackingOrderDetails(request, order_number):
         trackStatus['status'] = replace_tracking_status[i]
     serializer = TrackingStatusSerializer(tracking_all_details)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def upload_track_csv(request):
+    file = request.FILES.get('file')
+    if  file == None:
+        return Response({"error": "Please Input Your File"}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        create = create_track_dataset(file_path=file)
+        # create = create_broker_dataset(obj.file)
+        if create:
+          return Response({"message": "Upload Track CSV"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error":'Error Occuard'}, status=status.HTTP_400_BAD_REQUEST)
+    except:
+        return Response({"messsage": "Check your file please"}, status=status.HTTP_400_BAD_REQUEST)
 

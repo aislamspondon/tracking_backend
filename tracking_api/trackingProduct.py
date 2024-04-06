@@ -23,7 +23,7 @@ class TrackAPI:
         track_response = requests.get(trackerUrl, headers=headers)
         track_response_json = json.loads(track_response.text)
         # print(track_response_json, "Track Response Json")
-        # print(track_response.text, "Track Response")
+        print(track_response.text, "Track Response")
         status = track_response_json['data']['trackings'][0]
         all_track_status = status['events']
         estimatedDate = status['shipment']['delivery']['estimatedDeliveryDate']

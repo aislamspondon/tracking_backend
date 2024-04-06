@@ -32,6 +32,7 @@ def intro(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAdminUser])
 def registerUser(request):
     data = request.data
     user = User.objects.create(

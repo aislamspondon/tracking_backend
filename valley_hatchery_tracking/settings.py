@@ -28,7 +28,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['159.203.88.74','admin.vhtracking.com', '127.0.0.1']
 
 
 # Application definition
@@ -48,32 +48,15 @@ INSTALLED_APPS = [
     # Install Third Party
     'rest_framework',
     "phonenumber_field",
+    'drf_spectacular',
     "corsheaders",
 ]
-
-CSRF_TRUSTED_ORIGINS = [
-    'https://vhtrackingbackend.visionarytechsolution.com'
-]
-
-CORS_ALLOWED_ORIGINS = [
-    "https://example.com",
-    "https://sub.example.com",
-    "http://localhost:3000",
-    "http://127.0.0.1:8000",
-    "https://vhtracking-frontend.vercel.app",
-    "https://vhtracking.com",
-    "http://vhtracking.visionarytechsolution.com",
-]
-ALLOWED_HOSTS = ['*']
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = True
-
-
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SIMPLE_JWT = {
@@ -125,7 +108,7 @@ ROOT_URLCONF = 'valley_hatchery_tracking.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -142,15 +125,7 @@ WSGI_APPLICATION = 'valley_hatchery_tracking.wsgi.application'
 AUTH_USER_MODEL = 'authentication.User'
 
 
-CORS_ALLOWED_ORIGINS = [
-    "https://example.com",
-    "https://sub.example.com",
-    "http://localhost:3000",
-    "http://127.0.0.1:8000",
-    "https://vhtracking-frontend.vercel.app",
-    "https://vhtracking.com",
-    "http://vhtracking.visionarytechsolution.com",
-]
+CORS_ALLOW_ALL_ORIGINS=True
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
@@ -210,6 +185,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'static'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
