@@ -15,8 +15,10 @@ import pandas as pd
 
 def create_track_dataset(file_path):
     data = pd.read_excel(file_path)
+    print(data, "Data is ")
     for index, row in data.iterrows():
       TrackingNum = row['TrackingNum']
+      print(TrackingNum)
       OrderNumber = row['OrderNumber']
       Tracking.objects.create(
           tracking_number = TrackingNum,
@@ -209,9 +211,11 @@ def trackingOrderDetails(request, order_number):
 def upload_track_csv(request):
     file = request.FILES.get('file')
     if  file == None:
+        print(file)
         return Response({"error": "Please Input Your File"}, status=status.HTTP_400_BAD_REQUEST)
     try:
         create = create_track_dataset(file_path=file)
+        print(create, "Create Condition")
         # create = create_broker_dataset(obj.file)
         if create:
           return Response({"message": "Upload Track CSV"}, status=status.HTTP_200_OK)
