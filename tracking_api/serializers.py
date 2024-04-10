@@ -17,6 +17,8 @@ class BlacklistedSerializer(serializers.ModelSerializer):
 class StatusSerializer(serializers.Serializer):
     status = serializers.CharField()
     date = serializers.DateTimeField()
+    location = serializers.CharField()
+
 
 class TrackingStatusSerializer(serializers.Serializer):
     estimateDelivery = serializers.DateTimeField(required=False)
