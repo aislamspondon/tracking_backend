@@ -195,14 +195,22 @@ def trackingOrderDetails(request, order_number):
     track = TrackAPI()
     tracking_all_details = track.TrackingOrder(trackingId)
     tracking_status = tracking_all_details['status']
+    # tracking_location = tracking_all_details['location']
+    # print(tracking_location)
     # Create a regular expression pattern from the dictionary keys
     pattern = '|'.join(r'\b{}\b'.format(re.escape(d['word'])) for d in blacklisted_word)
     # Replace the words in the array with the corresponding replacement words
-    replace_tracking_status = [re.sub(pattern, lambda m: next((d['replace_word'] for d in blacklisted_word if d['word'] == m.group(0))), item['status']) for item in tracking_status]
+    replace_tracking_status = [re.sub(pattern, lambda m: next((d['replace_word'] for d in blacklisted_word if d['word'] == m.group(0))), str(item['status'])) for item in tracking_status]
+
+    replace_tracking_location = [re.sub(pattern, lambda m: next((d['replace_word'] for d in blacklisted_word if d['word'] ==  m.group(0))), str(item['location'])) for item in tracking_status]
+    print(replace_tracking_location)
     for i,trackStatus in enumerate(tracking_all_details['status']):
         trackStatus['status'] = replace_tracking_status[i]
+        trackStatus['location'] = replace_tracking_location[i]
     serializer = TrackingStatusSerializer(tracking_all_details)
+    print(tracking_all_details)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 
