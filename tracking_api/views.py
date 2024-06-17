@@ -15,10 +15,8 @@ import pandas as pd
 
 def create_track_dataset(file_path):
     data = pd.read_excel(file_path)
-    print(data, "Data is ")
     for index, row in data.iterrows():
       TrackingNum = row['TrackingNum']
-      print(TrackingNum)
       OrderNumber = row['OrderNumber']
       Tracking.objects.create(
           tracking_number = TrackingNum,
@@ -188,29 +186,28 @@ def trackingOrderDetails(request, order_number):
     qs = Tracking.objects.filter(order_number=order_number)
     if not qs.exists():
         return Response({"message": "Order not exits"}, status=status.HTTP_404_NOT_FOUND)
-    tracking = qs.first()
-    trackingId = tracking.tracking_number
-    blacklist = BlackListed.objects.all()
-    blacklisted_word = [{'word': q.word, 'replace_word': q.replace_word } for q in blacklist]
-    track = TrackAPI()
-    tracking_all_details = track.TrackingOrder(trackingId)
-    tracking_status = tracking_all_details['status']
-    # tracking_location = tracking_all_details['location']
-    # print(tracking_location)
-    # Create a regular expression pattern from the dictionary keys
-    pattern = '|'.join(r'\b{}\b'.format(re.escape(d['word'])) for d in blacklisted_word)
-    # Replace the words in the array with the corresponding replacement words
-    replace_tracking_status = [re.sub(pattern, lambda m: next((d['replace_word'] for d in blacklisted_word if d['word'] == m.group(0))), str(item['status'])) for item in tracking_status]
+    trackingInfo = []
+    for tracking in qs:
+        trackingId = tracking.tracking_number
+        blacklist = BlackListed.objects.all()
+        blacklisted_word = [{'word': q.word, 'replace_word': q.replace_word } for q in blacklist]
+        track = TrackAPI()
+        tracking_all_details = track.TrackingOrder(trackingId)
+        tracking_status = tracking_all_details['status']
+        # tracking_location = tracking_all_details['location']
+        # print(tracking_location)
+        # Create a regular expression pattern from the dictionary keys
+        pattern = '|'.join(r'\b{}\b'.format(re.escape(d['word'])) for d in blacklisted_word)
+        # Replace the words in the array with the corresponding replacement words
+        replace_tracking_status = [re.sub(pattern, lambda m: next((d['replace_word'] for d in blacklisted_word if d['word'] == m.group(0))), str(item['status'])) for item in tracking_status]
+        replace_tracking_location = [re.sub(pattern, lambda m: next((d['replace_word'] for d in blacklisted_word if d['word'] ==  m.group(0))), str(item['location'])) for item in tracking_status]
+        for i,trackStatus in enumerate(tracking_all_details['status']):
+            trackStatus['status'] = replace_tracking_status[i]
+            trackStatus['location'] = replace_tracking_location[i]
+        serializer = TrackingStatusSerializer(tracking_all_details)
 
-    replace_tracking_location = [re.sub(pattern, lambda m: next((d['replace_word'] for d in blacklisted_word if d['word'] ==  m.group(0))), str(item['location'])) for item in tracking_status]
-    print(replace_tracking_location)
-    for i,trackStatus in enumerate(tracking_all_details['status']):
-        trackStatus['status'] = replace_tracking_status[i]
-        trackStatus['location'] = replace_tracking_location[i]
-    serializer = TrackingStatusSerializer(tracking_all_details)
-    print(tracking_all_details)
-    return Response(serializer.data, status=status.HTTP_200_OK)
-
+        trackingInfo.append(serializer.data)
+    return Response(trackingInfo, status=status.HTTP_200_OK)
 
 
 
@@ -219,11 +216,9 @@ def trackingOrderDetails(request, order_number):
 def upload_track_csv(request):
     file = request.FILES.get('file')
     if  file == None:
-        print(file)
         return Response({"error": "Please Input Your File"}, status=status.HTTP_400_BAD_REQUEST)
     try:
         create = create_track_dataset(file_path=file)
-        print(create, "Create Condition")
         # create = create_broker_dataset(obj.file)
         if create:
           return Response({"message": "Upload Track CSV"}, status=status.HTTP_200_OK)
@@ -232,3 +227,30 @@ def upload_track_csv(request):
     except:
         return Response({"messsage": "Check your file please"}, status=status.HTTP_400_BAD_REQUEST)
 
+
+
+# @api_view(['GET'])
+# def trackingOrderDetails(request, order_number):
+#     qs = Tracking.objects.filter(order_number=order_number)
+#     if not qs.exists():
+#         return Response({"message": "Order not exits"}, status=status.HTTP_404_NOT_FOUND)
+#     print(qs)
+#     tracking = qs.first()
+#     trackingId = tracking.tracking_number
+#     blacklist = BlackListed.objects.all()
+#     blacklisted_word = [{'word': q.word, 'replace_word': q.replace_word } for q in blacklist]
+#     track = TrackAPI()
+#     tracking_all_details = track.TrackingOrder(trackingId)
+#     tracking_status = tracking_all_details['status']
+#     # tracking_location = tracking_all_details['location']
+#     # Create a regular expression pattern from the dictionary keys
+#     pattern = '|'.join(r'\b{}\b'.format(re.escape(d['word'])) for d in blacklisted_word)
+#     # Replace the words in the array with the corresponding replacement words
+#     replace_tracking_status = [re.sub(pattern, lambda m: next((d['replace_word'] for d in blacklisted_word if d['word'] == m.group(0))), str(item['status'])) for item in tracking_status]
+
+#     replace_tracking_location = [re.sub(pattern, lambda m: next((d['replace_word'] for d in blacklisted_word if d['word'] ==  m.group(0))), str(item['location'])) for item in tracking_status]
+#     for i,trackStatus in enumerate(tracking_all_details['status']):
+#         trackStatus['status'] = replace_tracking_status[i]
+#         trackStatus['location'] = replace_tracking_location[i]
+#     serializer = TrackingStatusSerializer(tracking_all_details)
+#     return Response(serializer.data, status=status.HTTP_200_OK)

@@ -7,7 +7,7 @@ import requests
 class TrackAPI:
     ship24Url = "https://api.ship24.com/public/v1/trackers"
     apiKey = "apik_CjnUCgyp4aJBRYbArHGb3kCYeBvYhI"
-    
+
     def TrackingOrder(self, trackingNumber):
         headers = {
         "Authorization": f"Bearer {self.apiKey}",
@@ -30,4 +30,3 @@ class TrackAPI:
         eventStatus = [{'status': track_status['status'], 'date': track_status['datetime'], 'location': track_status['location'] } for track_status in all_track_status]
         delivery = ({'estimateDelivery': estimatedDate, 'status': eventStatus})
         return delivery
-
