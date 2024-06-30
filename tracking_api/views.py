@@ -14,17 +14,34 @@ import pandas as pd
 
 
 def create_track_dataset(file_path):
-    data = pd.read_excel(file_path)
+    try:
+        data = pd.read_excel(file_path)
+    except Exception as e:
+        print(f"Error reading Excel file: {e}")
+        return False
+
+    # print("Columns in the Excel file:", data.columns.tolist())
+
     for index, row in data.iterrows():
-      TrackingNum = row['TrackingNum']
-      OrderNumber = row['OrderNumber']
-      Tracking.objects.create(
-          tracking_number = TrackingNum,
-        order_number = OrderNumber,
-      )
+        try:
+            if 'TrackingNum' not in data.columns or 'OrderNumber' not in data.columns:
+                print("Required columns are not present in the Excel file.")
+                if 'Tracking Number' not in data.columns or 'Reference Number' not in data.columns:
+                    return False
+                TrackingNum = row['Tracking Number']
+                OrderNumber = row['Reference Number'][3:]
+            else:
+                TrackingNum = row['TrackingNum']
+                OrderNumber = row['OrderNumber']
+            Tracking.objects.create(
+                tracking_number = TrackingNum,
+                order_number = OrderNumber,
+            )
+        except KeyError as e:
+            print(f"Missing column in row {index}: {e}")
+            continue
+
     return True
-
-
 
 
 @api_view(['POST'])
@@ -210,7 +227,6 @@ def trackingOrderDetails(request, order_number):
     return Response(trackingInfo, status=status.HTTP_200_OK)
 
 
-
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
 def upload_track_csv(request):
@@ -224,33 +240,6 @@ def upload_track_csv(request):
           return Response({"message": "Upload Track CSV"}, status=status.HTTP_200_OK)
         else:
             return Response({"error":'Error Occuard'}, status=status.HTTP_400_BAD_REQUEST)
-    except:
+    except Exception as e:
+        print("Error is :", e)
         return Response({"messsage": "Check your file please"}, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-# @api_view(['GET'])
-# def trackingOrderDetails(request, order_number):
-#     qs = Tracking.objects.filter(order_number=order_number)
-#     if not qs.exists():
-#         return Response({"message": "Order not exits"}, status=status.HTTP_404_NOT_FOUND)
-#     print(qs)
-#     tracking = qs.first()
-#     trackingId = tracking.tracking_number
-#     blacklist = BlackListed.objects.all()
-#     blacklisted_word = [{'word': q.word, 'replace_word': q.replace_word } for q in blacklist]
-#     track = TrackAPI()
-#     tracking_all_details = track.TrackingOrder(trackingId)
-#     tracking_status = tracking_all_details['status']
-#     # tracking_location = tracking_all_details['location']
-#     # Create a regular expression pattern from the dictionary keys
-#     pattern = '|'.join(r'\b{}\b'.format(re.escape(d['word'])) for d in blacklisted_word)
-#     # Replace the words in the array with the corresponding replacement words
-#     replace_tracking_status = [re.sub(pattern, lambda m: next((d['replace_word'] for d in blacklisted_word if d['word'] == m.group(0))), str(item['status'])) for item in tracking_status]
-
-#     replace_tracking_location = [re.sub(pattern, lambda m: next((d['replace_word'] for d in blacklisted_word if d['word'] ==  m.group(0))), str(item['location'])) for item in tracking_status]
-#     for i,trackStatus in enumerate(tracking_all_details['status']):
-#         trackStatus['status'] = replace_tracking_status[i]
-#         trackStatus['location'] = replace_tracking_location[i]
-#     serializer = TrackingStatusSerializer(tracking_all_details)
-#     return Response(serializer.data, status=status.HTTP_200_OK)
