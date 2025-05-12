@@ -81,7 +81,7 @@ def upload_tracking(request):
             })
 
         except KeyError as e:
-            return Response({"error": f"Missing key: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": f"Missing key is: {e}"}, status=status.HTTP_400_BAD_REQUEST)
 
     return Response({
         "message": "Tracking upload completed",
