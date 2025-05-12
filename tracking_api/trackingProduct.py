@@ -11,6 +11,8 @@ class TrackAPI:
     aftershipUrl = "https://api.aftership.com/v4/trackings"
     aftershipApiKey = "asat_eea4c356e9de40fea4b47806fbd7dd9f"
 
+
+
     def TrackingOrder(self, trackingNumber):
         headers = {
             "Authorization": f"Bearer {self.ship24ApiKey}",
@@ -129,9 +131,9 @@ class TrackAPI:
 
           eventStatus = [
               {
-                  'status': track_status.get('status', 'N/A'),
-                  'date': track_status.get('datetime', 'N/A'),
-                  'location': track_status.get('location', 'N/A')
+                  'status': track_status.get('status', []),
+                  'date': track_status.get('datetime', None),
+                  'location': track_status.get('location', None)
               }
               for track_status in all_track_status
           ]
