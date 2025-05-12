@@ -49,10 +49,16 @@ def create_track_dataset(file_path):
 def CreateTracking(request):
     data = request.data
     print(request.user)
+    
+    track_api = TrackAPI()
+    track_api.postAfterShipTracking(data['tracking_number'])
+
+
     trackCreate = Tracking.objects.create(
         tracking_number = data['tracking_number'],
         order_number = data['order_number'],
     )
+    print("Track Created", trackCreate)
     serializer = TrackingSerializer(trackCreate)
     return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
@@ -183,10 +189,10 @@ def trackOrder(request):
     blacklist = BlackListed.objects.all()
     # print(trackingId)
     blacklisted_word = [{'word': q.word, 'replace_word': q.replace_word } for q in blacklist]
-    print("Enter APi")
     track = TrackAPI()
     # print("Out From APi ", track)
-    tracking_all_details = track.TrackingOrder(trackingId)
+    # tracking_all_details = track.TrackingOrder(trackingId)
+    tracking_all_details = track.AftershipTracking(trackingId)
     tracking_status = tracking_all_details['status']
     # Create a regular expression pattern from the dictionary keys
     pattern = '|'.join(r'\b{}\b'.format(re.escape(d['word'])) for d in blacklisted_word)
@@ -202,15 +208,17 @@ def trackOrder(request):
 def trackingOrderDetails(request, order_number):
     qs = Tracking.objects.filter(order_number=order_number)
     if not qs.exists():
-        return Response({"message": "Order not exits"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"message": "Unable to locate order, please contact Customer Service at help@valleyhatchery.com."}, status=status.HTTP_404_NOT_FOUND)
     trackingInfo = []
     for tracking in qs:
         trackingId = tracking.tracking_number
         blacklist = BlackListed.objects.all()
         blacklisted_word = [{'word': q.word, 'replace_word': q.replace_word } for q in blacklist]
         track = TrackAPI()
-        tracking_all_details = track.TrackingOrder(trackingId)
+        # tracking_all_details = track.TrackingOrder(trackingId)
+        tracking_all_details = track.AftershipTracking(trackingId)
         tracking_status = tracking_all_details['status']
+        print("this is nothing to do ")
         # tracking_location = tracking_all_details['location']
         # print(tracking_location)
         # Create a regular expression pattern from the dictionary keys
@@ -224,6 +232,7 @@ def trackingOrderDetails(request, order_number):
         serializer = TrackingStatusSerializer(tracking_all_details)
 
         trackingInfo.append(serializer.data)
+        print("Tracking Info", trackingInfo)
     return Response(trackingInfo, status=status.HTTP_200_OK)
 
 
