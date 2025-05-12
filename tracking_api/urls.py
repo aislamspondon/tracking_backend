@@ -18,6 +18,8 @@ urlpatterns = [
     path('track/', views.trackOrder, name="track_order"),
     path('track_csv_upload/', views.upload_track_csv, name="track_csv_upload"),
     path('trackOrder/<str:order_number>/', views.trackingOrderDetails, name="track_order_details"),
+    path('api/download/tracking/', views.download_tracking_excel, name='download-tracking-excel'),
+    path('api/download/blacklisted/', views.download_blacklisted_excel, name='download-blacklisted-excel'),
 
     
 ]

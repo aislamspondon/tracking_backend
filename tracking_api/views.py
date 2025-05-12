@@ -11,6 +11,26 @@ from tracking_api.serializers import (BlacklistedSerializer,
                                       TrackingStatusSerializer)
 from tracking_api.trackingProduct import TrackAPI
 import pandas as pd
+from django.http import HttpResponse
+
+# Download all Trackings as Excel
+def download_tracking_excel(request):
+    data = Tracking.objects.all().values('tracking_number', 'order_number', 'create_at')
+    df = pd.DataFrame(data)
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=tracking_data.xlsx'
+    df.to_excel(response, index=False)
+    return response
+
+# Download all BlackListed words as Excel
+def download_blacklisted_excel(request):
+    data = BlackListed.objects.all().values('word', 'replace_word', 'create_at')
+    df = pd.DataFrame(data)
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=blacklisted_words.xlsx'
+    df.to_excel(response, index=False)
+    return response
+
 
 
 def create_track_dataset(file_path):
@@ -218,7 +238,7 @@ def trackingOrderDetails(request, order_number):
         # tracking_all_details = track.TrackingOrder(trackingId)
         tracking_all_details = track.AftershipTracking(trackingId)
         tracking_status = tracking_all_details['status']
-        print("this is nothing to do ")
+        print("this is nothing to do Now")
         # tracking_location = tracking_all_details['location']
         # print(tracking_location)
         # Create a regular expression pattern from the dictionary keys
