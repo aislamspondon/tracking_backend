@@ -13,7 +13,15 @@ from tracking_api.trackingProduct import TrackAPI
 import pandas as pd
 from django.http import HttpResponse
 
-# Download all Trackings as Excel
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny  # or IsAdminUser if needed
+from django.http import HttpResponse
+import pandas as pd
+from tracking_api.models import Tracking, BlackListed
+
+# API to download tracking data as Excel
+@api_view(['GET'])
+@permission_classes([AllowAny])  # Change to [IsAdminUser] if access should be restricted
 def download_tracking_excel(request):
     data = Tracking.objects.all().values('tracking_number', 'order_number', 'create_at')
     df = pd.DataFrame(data)
@@ -22,7 +30,9 @@ def download_tracking_excel(request):
     df.to_excel(response, index=False)
     return response
 
-# Download all BlackListed words as Excel
+# API to download blacklisted data as Excel
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def download_blacklisted_excel(request):
     data = BlackListed.objects.all().values('word', 'replace_word', 'create_at')
     df = pd.DataFrame(data)
@@ -30,6 +40,7 @@ def download_blacklisted_excel(request):
     response['Content-Disposition'] = 'attachment; filename=blacklisted_words.xlsx'
     df.to_excel(response, index=False)
     return response
+
 
 
 
