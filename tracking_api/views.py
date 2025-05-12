@@ -11,37 +11,6 @@ from tracking_api.serializers import (BlacklistedSerializer,
                                       TrackingStatusSerializer)
 from tracking_api.trackingProduct import TrackAPI
 import pandas as pd
-from django.http import HttpResponse
-
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny  # or IsAdminUser if needed
-from django.http import HttpResponse
-import pandas as pd
-from tracking_api.models import Tracking, BlackListed
-
-# API to download tracking data as Excel
-@api_view(['GET'])
-@permission_classes([AllowAny])  # Change to [IsAdminUser] if access should be restricted
-def download_tracking_excel(request):
-    data = Tracking.objects.all().values('tracking_number', 'order_number', 'create_at')
-    df = pd.DataFrame(data)
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename=tracking_data.xlsx'
-    df.to_excel(response, index=False)
-    return response
-
-# API to download blacklisted data as Excel
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def download_blacklisted_excel(request):
-    data = BlackListed.objects.all().values('word', 'replace_word', 'create_at')
-    df = pd.DataFrame(data)
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename=blacklisted_words.xlsx'
-    df.to_excel(response, index=False)
-    return response
-
-
 
 
 def create_track_dataset(file_path):
@@ -73,6 +42,52 @@ def create_track_dataset(file_path):
             continue
 
     return True
+
+
+
+
+@api_view(['POST'])
+def upload_tracking(request):
+    data = request.data  # expecting a JSON list of tracking items
+
+    if not isinstance(data, list):
+        return Response({"error": "Expected a list of tracking items"}, status=status.HTTP_400_BAD_REQUEST)
+
+    created = []
+    skipped = []
+
+    for item in data:
+        try:
+            tracking_number = item['tracking_no']
+            order_number = item['order_id']
+
+            # Check if tracking_number already exists
+            if Tracking.objects.filter(tracking_number=tracking_number).exists():
+                skipped.append({
+                    "tracking_number": tracking_number,
+                    "reason": "Already exists"
+                })
+                continue
+
+            tracking = Tracking.objects.create(
+                tracking_number=tracking_number,
+                order_number=order_number
+            )
+
+            created.append({
+                "_id": tracking._id,
+                "tracking_number": tracking.tracking_number,
+                "order_number": tracking.order_number
+            })
+
+        except KeyError as e:
+            return Response({"error": f"Missing key: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response({
+        "message": "Tracking upload completed",
+        "created": created,
+        "skipped": skipped
+    }, status=status.HTTP_201_CREATED)
 
 
 @api_view(['POST'])
@@ -249,7 +264,7 @@ def trackingOrderDetails(request, order_number):
         # tracking_all_details = track.TrackingOrder(trackingId)
         tracking_all_details = track.AftershipTracking(trackingId)
         tracking_status = tracking_all_details['status']
-        print("this is nothing to do Now")
+        print("this is nothing to do ")
         # tracking_location = tracking_all_details['location']
         # print(tracking_location)
         # Create a regular expression pattern from the dictionary keys
