@@ -12,7 +12,6 @@ class TrackAPI:
     aftershipApiKey = "asat_eea4c356e9de40fea4b47806fbd7dd9f"
 
 
-
     def TrackingOrder(self, trackingNumber):
         headers = {
             "Authorization": f"Bearer {self.ship24ApiKey}",
