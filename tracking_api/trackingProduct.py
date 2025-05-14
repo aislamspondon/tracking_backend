@@ -85,7 +85,7 @@ class TrackAPI:
         raw_data = response.json()
         tracking = raw_data["data"]["tracking"]
         print("----------------------------------------------------------")
-            # print("Tracking Status Object:", status)
+            print("Tracking Status Object:------------>")
         print(json.dumps(tracking, indent=4))
         print("----------------------------------------------------------")
 
