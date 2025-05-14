@@ -9,7 +9,7 @@ class TrackAPI:
 
     # AfterShip config
     aftershipUrl = "https://api.aftership.com/v4/trackings"
-    aftershipApiKey = "asat_fc3baaeb4e1a4faaba44d0101abd78d8"
+    aftershipApiKey = "asat_af8a2918138148f3847c9a3aa19ad3f8"
 
 
     def TrackingOrder(self, trackingNumber):
