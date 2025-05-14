@@ -94,7 +94,6 @@ def upload_tracking(request):
 @permission_classes([IsAdminUser])
 def CreateTracking(request):
     data = request.data
-    print(request.user)
     
     track_api = TrackAPI()
     track_api.postAfterShipTracking(data['tracking_number'])
@@ -104,7 +103,7 @@ def CreateTracking(request):
         tracking_number = data['tracking_number'],
         order_number = data['order_number'],
     )
-    print("Track Created", trackCreate)
+    # print("Track Created", trackCreate)
     serializer = TrackingSerializer(trackCreate)
     return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
@@ -155,7 +154,6 @@ def deletetracking(request, tracking_id):
 def deletetracking_list(request):
     data = request.data
     user = request.user
-    print(user)
     if 'track_data_list' not in request.data:
         return Response({"error": "Please Enter Trackdata"}, status= status.HTTP_400_BAD_REQUEST)
     track_data = data['track_data_list']
@@ -264,7 +262,7 @@ def trackingOrderDetails(request, order_number):
         # tracking_all_details = track.TrackingOrder(trackingId)
         tracking_all_details = track.AftershipTracking(trackingId)
         tracking_status = tracking_all_details['status']
-        print("this is nothing to do ")
+        # print("this is nothing to do ")
         # tracking_location = tracking_all_details['location']
         # print(tracking_location)
         # Create a regular expression pattern from the dictionary keys
@@ -278,7 +276,7 @@ def trackingOrderDetails(request, order_number):
         serializer = TrackingStatusSerializer(tracking_all_details)
 
         trackingInfo.append(serializer.data)
-        print("Tracking Info", trackingInfo)
+        # print("Tracking Info", trackingInfo)
     return Response(trackingInfo, status=status.HTTP_200_OK)
 
 

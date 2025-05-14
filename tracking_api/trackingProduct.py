@@ -9,7 +9,7 @@ class TrackAPI:
 
     # AfterShip config
     aftershipUrl = "https://api.aftership.com/v4/trackings"
-    aftershipApiKey = "asat_eea4c356e9de40fea4b47806fbd7dd9f"
+    aftershipApiKey = "asat_fc3baaeb4e1a4faaba44d0101abd78d8"
 
 
     def TrackingOrder(self, trackingNumber):
@@ -32,7 +32,7 @@ class TrackAPI:
 
             status = track_response_json['data']['trackings'][0]
             print("----------------------------------------------------------")
-            print("Tracking Status Object:", status)
+            # print("Tracking Status Object:", status)
             print("----------------------------------------------------------")
             all_track_status = status['events']
             estimatedDate = status['shipment']['delivery']['estimatedDeliveryDate']
@@ -84,6 +84,10 @@ class TrackAPI:
         # Parse tracking info
         raw_data = response.json()
         tracking = raw_data["data"]["tracking"]
+        print("----------------------------------------------------------")
+            # print("Tracking Status Object:", status)
+        print(json.dumps(tracking, indent=4))
+        print("----------------------------------------------------------")
 
         formatted_output = {
             "data": {
@@ -124,7 +128,7 @@ class TrackAPI:
           for event in status['events']:
             event['status'] = event.pop('message')
             event['datetime'] = event.pop('checkpoint_time')
-          print("Tracking Status Object:", status)
+        #   print("Tracking Status Object:", status)
           all_track_status = status.get('events', [])
           estimatedDate = status.get('shipment', {}).get('delivery', {}).get('estimatedDeliveryDate', None)
 
