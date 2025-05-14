@@ -1,5 +1,13 @@
-env/*
+# Ignore virtual environment folders
+env/
+venv/
+
+# Ignore environment variable files
 .env
 
+# Ignore SQLite database file
 db.sqlite3
-env
+
+# Optional: Ignore __pycache__ and compiled Python files
+__pycache__/
+*.py[cod]
