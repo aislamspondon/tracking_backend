@@ -4,6 +4,7 @@ from django.db import models
 # Create your models here.
 class Tracking(models.Model):
     _id=models.AutoField(primary_key=True, editable=False)
+    tracking_id = models.CharField(max_length=50, blank=True, null=True)
     tracking_number = models.CharField(max_length=50, blank=False)
     order_number = models.CharField(max_length=50, blank=False)
     create_at = models.DateField(auto_now_add=True)
