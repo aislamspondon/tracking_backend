@@ -276,7 +276,7 @@ def trackingOrderDetails(request, order_number):
         else:
             print("No tracking status available")
             # Handle the case where status is not available
-            tracking_status = []
+            return Response({"message": "No tracking status available"}, status=status.HTTP_404_NOT_FOUND)
         # print("this is nothing to do ")
         # tracking_location = tracking_all_details['location']
         # print(tracking_location)
