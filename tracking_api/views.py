@@ -96,8 +96,8 @@ def CreateTracking(request):
     data = request.data
     
     track_api = TrackAPI()
-    # track_api.postAfterShipTracking(data['tracking_number'])
-    tracking_id = track_api.postAfterShipTrackingVersion2(data['tracking_number'])
+    tracking_id = track_api.postAfterShipTracking(data['tracking_number'])
+    # tracking_id = track_api.postAfterShipTrackingVersion2(data['tracking_number'])
     if tracking_id is False:
         return Response({"error": "Failed to create tracking ID"}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -266,8 +266,9 @@ def trackingOrderDetails(request, order_number):
         blacklisted_word = [{'word': q.word, 'replace_word': q.replace_word } for q in blacklist]
         track = TrackAPI()
         # tracking_all_details = track.TrackingOrder(trackingId)
-        tracking_all_details = track.AfterShipTrackingVersion2(trackingId)
-        tracking_status = tracking_all_details['tracking_status']
+        # tracking_all_details = track.AfterShipTrackingVersion2(trackingId)
+        tracking_all_details = track.AftershipTracking(trackingId)
+        tracking_status = tracking_all_details['status']
         # print("this is nothing to do ")
         # tracking_location = tracking_all_details['location']
         # print(tracking_location)
@@ -276,7 +277,7 @@ def trackingOrderDetails(request, order_number):
         # Replace the words in the array with the corresponding replacement words
         replace_tracking_status = [re.sub(pattern, lambda m: next((d['replace_word'] for d in blacklisted_word if d['word'] == m.group(0))), str(item['status'])) for item in tracking_status]
         replace_tracking_location = [re.sub(pattern, lambda m: next((d['replace_word'] for d in blacklisted_word if d['word'] ==  m.group(0))), str(item['location'])) for item in tracking_status]
-        for i,trackStatus in enumerate(tracking_all_details['tracking_status']):
+        for i,trackStatus in enumerate(tracking_all_details['status']):
             trackStatus['status'] = replace_tracking_status[i]
             trackStatus['location'] = replace_tracking_location[i]
         serializer = TrackingStatusSerializer(tracking_all_details)
