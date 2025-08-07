@@ -270,7 +270,13 @@ def trackingOrderDetails(request, order_number):
         tracking_all_details = track.AftershipTracking(trackingId)
         print("-0-------------------------------------------------------------")
         print("Tracking All Details:", tracking_all_details)
-        tracking_status = tracking_all_details['status']
+        if 'status' in tracking_all_details:
+            tracking_status = tracking_all_details['status']
+            print("Tracking Status:", tracking_status)
+        else:
+            print("No tracking status available")
+            # Handle the case where status is not available
+            tracking_status = []
         # print("this is nothing to do ")
         # tracking_location = tracking_all_details['location']
         # print(tracking_location)
