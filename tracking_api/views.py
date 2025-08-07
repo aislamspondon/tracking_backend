@@ -285,7 +285,7 @@ def trackingOrderDetails(request, order_number):
         # Replace the words in the array with the corresponding replacement words
         replace_tracking_status = [re.sub(pattern, lambda m: next((d['replace_word'] for d in blacklisted_word if d['word'] == m.group(0))), str(item['status'])) for item in tracking_status]
         replace_tracking_location = [re.sub(pattern, lambda m: next((d['replace_word'] for d in blacklisted_word if d['word'] ==  m.group(0))), str(item['location'])) for item in tracking_status]
-        for i,trackStatus in enumerate(tracking_all_details['status']):
+        for i,trackStatus in enumerate(tracking_status):
             trackStatus['status'] = replace_tracking_status[i]
             trackStatus['location'] = replace_tracking_location[i]
         serializer = TrackingStatusSerializer(tracking_all_details)
