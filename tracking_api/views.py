@@ -96,21 +96,15 @@ def CreateTracking(request):
     data = request.data
     
     track_api = TrackAPI()
-    tracking_id = track_api.postAfterShipTracking(data['tracking_number'])
-    # tracking_id = track_api.postAfterShipTrackingVersion2(data['tracking_number'])
-    if tracking_id is False:
-        return Response({"error": "Failed to create tracking ID"}, status=status.HTTP_400_BAD_REQUEST)
-    
+    track_api.postAfterShipTracking(data['tracking_number'])
 
 
     trackCreate = Tracking.objects.create(
-        tracking_id = tracking_id,
         tracking_number = data['tracking_number'],
         order_number = data['order_number'],
     )
     # print("Track Created", trackCreate)
     serializer = TrackingSerializer(trackCreate)
-    print(serializer.data, "Track Created")
     return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
 @api_view(['GET'])
@@ -261,22 +255,13 @@ def trackingOrderDetails(request, order_number):
         return Response({"message": "Unable to locate order, please contact Customer Service at help@valleyhatchery.com."}, status=status.HTTP_404_NOT_FOUND)
     trackingInfo = []
     for tracking in qs:
-        trackingId = tracking.tracking_id
+        trackingId = tracking.tracking_number
         blacklist = BlackListed.objects.all()
         blacklisted_word = [{'word': q.word, 'replace_word': q.replace_word } for q in blacklist]
         track = TrackAPI()
         # tracking_all_details = track.TrackingOrder(trackingId)
-        # tracking_all_details = track.AfterShipTrackingVersion2(trackingId)
         tracking_all_details = track.AftershipTracking(trackingId)
-        print("-0-------------------------------------------------------------")
-        print("Tracking All Details:", tracking_all_details)
-        if 'status' in tracking_all_details:
-            tracking_status = tracking_all_details['status']
-            print("Tracking Status:", tracking_status)
-        else:
-            print("No tracking status available")
-            # Handle the case where status is not available
-            return Response({"message": "No tracking status available"}, status=status.HTTP_404_NOT_FOUND)
+        tracking_status = tracking_all_details['status']
         # print("this is nothing to do ")
         # tracking_location = tracking_all_details['location']
         # print(tracking_location)
@@ -285,7 +270,7 @@ def trackingOrderDetails(request, order_number):
         # Replace the words in the array with the corresponding replacement words
         replace_tracking_status = [re.sub(pattern, lambda m: next((d['replace_word'] for d in blacklisted_word if d['word'] == m.group(0))), str(item['status'])) for item in tracking_status]
         replace_tracking_location = [re.sub(pattern, lambda m: next((d['replace_word'] for d in blacklisted_word if d['word'] ==  m.group(0))), str(item['location'])) for item in tracking_status]
-        for i,trackStatus in enumerate(tracking_status):
+        for i,trackStatus in enumerate(tracking_all_details['status']):
             trackStatus['status'] = replace_tracking_status[i]
             trackStatus['location'] = replace_tracking_location[i]
         serializer = TrackingStatusSerializer(tracking_all_details)
