@@ -268,6 +268,8 @@ def trackingOrderDetails(request, order_number):
         # tracking_all_details = track.TrackingOrder(trackingId)
         # tracking_all_details = track.AfterShipTrackingVersion2(trackingId)
         tracking_all_details = track.AftershipTracking(trackingId)
+        print("-0-------------------------------------------------------------")
+        print("Tracking All Details:", tracking_all_details)
         tracking_status = tracking_all_details['status']
         # print("this is nothing to do ")
         # tracking_location = tracking_all_details['location']
