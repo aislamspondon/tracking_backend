@@ -267,7 +267,7 @@ def trackingOrderDetails(request, order_number):
         track = TrackAPI()
         # tracking_all_details = track.TrackingOrder(trackingId)
         tracking_all_details = track.AfterShipTrackingVersion2(trackingId)
-        tracking_status = tracking_all_details['status']
+        tracking_status = tracking_all_details['tracking_status']
         # print("this is nothing to do ")
         # tracking_location = tracking_all_details['location']
         # print(tracking_location)

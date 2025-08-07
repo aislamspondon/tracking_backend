@@ -240,7 +240,7 @@ class TrackAPI:
             # print("eventStatus:", eventStatus)
             delivery = {
                 'estimateDelivery': estimatedDate,
-                'status': eventStatus
+                'tracking_status': eventStatus
             }
         except (KeyError, IndexError, TypeError) as e:
             print("Error processing tracking data:", str(e))
