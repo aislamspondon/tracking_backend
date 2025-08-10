@@ -1,7 +1,26 @@
 import json
 import requests
 import http.client
-import random
+from dateutil import parser
+
+def convert_timezone(timestamp_str):
+    """
+    Convert ISO8601 timestamp string with timezone info to another timezone.
+
+    Args:
+        timestamp_str (str): Original timestamp string, e.g. '2025-08-03T16:28:00-05:00'
+        target_timezone_str (str): Target timezone name, e.g. 'America/New_York'
+
+    Returns:
+        str: Converted timestamp string in format 'YYYY-MM-DDTHH:MM:SS±HHMM'
+    """
+    # Parse original timestamp string (aware datetime)
+    dt = parser.parse(timestamp_str)
+    
+    formatted = dt.strftime("%b %d, %Y at %I:%M %p")
+    print(formatted)  # Output: Aug 06, 2025 at 08:13 AM
+    return formatted
+
 
 class TrackAPI:
     # Ship24 config
@@ -189,6 +208,8 @@ class TrackAPI:
         if res.status != 200:
             return {"error": "Tracking number not found."}
         raw_data = json.loads(data.decode("utf-8"))
+        print("----------------------------------------------------------")
+        print("Tracking Status Object:------------>", json.dumps(raw_data, indent=4))
         tracking = raw_data.get("data", {})
         formatted_output = {
                 "data": {
@@ -233,7 +254,7 @@ class TrackAPI:
             eventStatus = [
                 {
                     'status': track_status.get('status', []),
-                    'date': track_status.get('datetime', None),
+                    'date': convert_timezone(track_status.get('datetime', None)),
                     'location': track_status.get('location', None)
                 }
                 for track_status in all_track_status
