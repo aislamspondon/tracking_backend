@@ -16,10 +16,11 @@ def convert_timezone(timestamp_str):
     """
     # Parse original timestamp string (aware datetime)
     dt = parser.parse(timestamp_str)
+    
     print(dt, "Parsed datetime object")
     formatted = dt.strftime("%b %d, %Y at %I:%M %p")
     print(formatted)  # Output: Aug 06, 2025 at 08:13 AM
-    return dt
+    return formatted
 
 
 class TrackAPI:
