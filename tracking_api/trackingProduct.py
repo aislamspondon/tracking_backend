@@ -16,10 +16,10 @@ def convert_timezone(timestamp_str):
     """
     # Parse original timestamp string (aware datetime)
     dt = parser.parse(timestamp_str)
-    
+    print(dt, "Parsed datetime object")
     formatted = dt.strftime("%b %d, %Y at %I:%M %p")
     print(formatted)  # Output: Aug 06, 2025 at 08:13 AM
-    return formatted
+    return dt
 
 
 class TrackAPI:
@@ -208,8 +208,6 @@ class TrackAPI:
         if res.status != 200:
             return {"error": "Tracking number not found."}
         raw_data = json.loads(data.decode("utf-8"))
-        print("----------------------------------------------------------")
-        print("Tracking Status Object:------------>", json.dumps(raw_data, indent=4))
         tracking = raw_data.get("data", {})
         formatted_output = {
                 "data": {
