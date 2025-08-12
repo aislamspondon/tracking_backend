@@ -33,7 +33,14 @@ def create_track_dataset(file_path):
             else:
                 TrackingNum = row['TrackingNum']
                 OrderNumber = row['OrderNumber']
+            track_api = TrackAPI()
+            tracking_id = track_api.postAfterShipTrackingVersion2(tracking_number=TrackingNum)
+            if tracking_id is False:
+                return Response({"error": "Failed to create tracking ID"}, status=status.HTTP_400_BAD_REQUEST)
+            
+
             Tracking.objects.create(
+                tracking_id = tracking_id,
                 tracking_number = TrackingNum,
                 order_number = OrderNumber,
             )
