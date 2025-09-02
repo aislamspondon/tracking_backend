@@ -269,13 +269,15 @@ def trackingOrderDetails(request, order_number):
     trackingInfo = []
     for tracking in qs:
         trackingId = tracking.tracking_id
+        tracking_number = tracking.tracking_number
         blacklist = BlackListed.objects.all()
         blacklisted_word = [{'word': q.word, 'replace_word': q.replace_word } for q in blacklist]
         track = TrackAPI()
         # tracking_all_details = track.TrackingOrder(trackingId)
-        tracking_all_details = track.AfterShipTrackingVersion2(trackingId)
+        # tracking_all_details = track.AfterShipTrackingVersion2(trackingId)
+        tracking_all_details = track.trackusps(tracking_number)
         # tracking_all_details = track.AftershipTracking(trackingId)
-        print("-0-------------------------------------------------------------")
+        print("---------------------------------------------------------------")
         print("Tracking All Details:", tracking_all_details)
         if 'status' in tracking_all_details:
             tracking_status = tracking_all_details['status']

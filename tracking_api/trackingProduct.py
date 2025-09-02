@@ -32,6 +32,7 @@ class TrackAPI:
     aftershipUrl = "https://api.aftership.com/v4/trackings"
     aftershipPrimaryUrl = "api.aftership.com"
     aftershipApiKey = "asat_13c8b5487df24312b1fa3efe20da5171"
+    token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3BzX3RyYWNraW5nX3VzZXIiLCJleHAiOjE3NTY4NjI2ODl9.D5sf4o0ZofDatRp91mBXqRY90M2rfR_0dqXhhnzJycg"
 
 
     def TrackingOrder(self, trackingNumber):
@@ -292,4 +293,27 @@ class TrackAPI:
         except Exception as e:
             print(f"Error creating tracking: {e}")
             return False
+        
+
+    def trackusps(self, tracking_number):
+        # First, try to post the tracking number to AfterShip
+        url = "https://usps.vhtracking.com/info/"
+        payload = {
+            "tracking_number": tracking_number
+        }
+        headers = {
+            "Authorization": f"Bearer {self.token}",
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(url, json=payload, headers=headers)
+
+        # Print status code and JSON response
+        tracking_status = response.json()['result']
+        print("Status Code:", response.status_code)
+        try:
+            return tracking_status
+        except Exception as e:
+            print(response.text)
+            print(f"Error parsing response: {e}")
 
