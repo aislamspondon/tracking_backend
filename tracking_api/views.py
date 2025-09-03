@@ -276,6 +276,8 @@ def trackingOrderDetails(request, order_number):
         # tracking_all_details = track.TrackingOrder(trackingId)
         # tracking_all_details = track.AfterShipTrackingVersion2(trackingId)
         tracking_all_details = track.trackusps(tracking_number)
+        print("---------------------------------------------------------------")
+        print("Running USPS Tracking API Now")
         # tracking_all_details = track.AftershipTracking(trackingId)
         print("---------------------------------------------------------------")
         print("Tracking All Details:", tracking_all_details)
