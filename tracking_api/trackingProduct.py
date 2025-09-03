@@ -32,7 +32,37 @@ class TrackAPI:
     aftershipUrl = "https://api.aftership.com/v4/trackings"
     aftershipPrimaryUrl = "api.aftership.com"
     aftershipApiKey = "asat_13c8b5487df24312b1fa3efe20da5171"
-    token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3BzX3RyYWNraW5nX3VzZXIiLCJleHAiOjE3NTY4NjI2ODl9.D5sf4o0ZofDatRp91mBXqRY90M2rfR_0dqXhhnzJycg"
+    token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3BzX3RyYWNraW5nX3VzZXIiLCJleHAiOjE3NTcyODYxMzB9.tKsDMPIBU3uL-0ll9-G-e9AfcEUB1eqt8R7f_XWuR4M"
+
+
+    def get_access_token(self):
+        url = "https://usps.vhtracking.com/api/token"
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+        data = {
+            "username": "usps_tracking_user",
+            "password": "USDKpaw3C3Rc"
+        }
+        try:
+            response = requests.post(url, data=data, headers=headers)
+
+            if response.status_code == 200:
+                print("Token retrieved successfully.")
+                print(response.json(), "Response JSON")
+                token = response.json().get("access")
+                self.token = token  # Store the token for future use
+                return True
+            else:
+                print(f"Failed to retrieve token. Status code: {response.status_code}")
+                return False
+
+        except requests.exceptions.RequestException as e:
+            print(f"An error occurred: {e}")
+            return False
+
+    
+
 
 
     def TrackingOrder(self, trackingNumber):
@@ -305,8 +335,21 @@ class TrackAPI:
             "Authorization": f"Bearer {self.token}",
             "Content-Type": "application/json"
         }
+        print(tracking_number, "Tracking Number to be sent")
 
-        response = requests.post(url, json=payload, headers=headers)
+        try:
+            response = requests.post(url, json=payload, headers=headers)
+            if response.status_code == 401:
+                print("Unauthorized: Check your API token.")
+                response_data = self.get_access_token()
+                if response_data:
+                    print("Token refreshed. Retrying...")
+                    headers["Authorization"] = f"Bearer {self.token}"
+                    response = requests.post(url, json=payload, headers=headers)
+                else:
+                    print("Failed to refresh token.")
+        except Exception as e:
+            print(f"Error posting tracking number: {e}")
 
         # Print status code and JSON response
         tracking_status = response.json()['result']
