@@ -327,6 +327,7 @@ class TrackAPI:
 
     def trackusps(self, tracking_number):
         # First, try to post the tracking number to AfterShip
+        print("USPS Script Track Function ---->")
         url = "https://usps.vhtracking.com/info/"
         payload = {
             "tracking_number": tracking_number

@@ -102,13 +102,13 @@ def upload_tracking(request):
 def CreateTracking(request):
     data = request.data
     
-    track_api = TrackAPI()
+    # track_api = TrackAPI()
     # tracking_id = track_api.postAfterShipTracking(data['tracking_number'])
-    tracking_id = track_api.postAfterShipTrackingVersion2(data['tracking_number'])
-    if tracking_id is False:
-        return Response({"error": "Failed to create tracking ID"}, status=status.HTTP_400_BAD_REQUEST)
+    # tracking_id = track_api.postAfterShipTrackingVersion2(data['tracking_number'])
+    # if tracking_id is False:
+    #     return Response({"error": "Failed to create tracking ID"}, status=status.HTTP_400_BAD_REQUEST)
     
-
+    tracking_id = None
 
     trackCreate = Tracking.objects.create(
         tracking_id = tracking_id,
@@ -268,7 +268,7 @@ def trackingOrderDetails(request, order_number):
         return Response({"message": "Unable to locate order, please contact Customer Service at help@valleyhatchery.com."}, status=status.HTTP_404_NOT_FOUND)
     trackingInfo = []
     for tracking in qs:
-        trackingId = tracking.tracking_id
+        # trackingId = tracking.tracking_id
         tracking_number = tracking.tracking_number
         blacklist = BlackListed.objects.all()
         blacklisted_word = [{'word': q.word, 'replace_word': q.replace_word } for q in blacklist]
