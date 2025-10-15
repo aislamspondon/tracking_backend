@@ -12,7 +12,6 @@ from tracking_api.serializers import (BlacklistedSerializer,
 from tracking_api.trackingProduct import TrackAPI
 import pandas as pd
 
-
 def create_track_dataset(file_path):
     try:
         data = pd.read_excel(file_path)
@@ -20,37 +19,47 @@ def create_track_dataset(file_path):
         print(f"Error reading Excel file: {e}")
         return False
 
-    # print("Columns in the Excel file:", data.columns.tolist())
+    # Normalize column names for consistency
+    col_map = {
+        "TrackingNum": "Tracking Number",
+        "OrderNumber": "Reference Number",
+    }
+
+    # Rename old column names to new ones if present
+    data.rename(columns=col_map, inplace=True)
+
+    # Check required columns
+    if "Tracking Number" not in data.columns or "Reference Number" not in data.columns:
+        print("Required columns 'Tracking Number' and 'Reference Number' are missing.")
+        return False
 
     for index, row in data.iterrows():
         try:
-            if 'TrackingNum' not in data.columns or 'OrderNumber' not in data.columns:
-                print("Required columns are not present in the Excel file.")
-                if 'Tracking Number' not in data.columns or 'Reference Number' not in data.columns:
-                    return False
-                TrackingNum = row['Tracking Number']
-                OrderNumber = row['Reference Number'][3:]
-            else:
-                TrackingNum = row['TrackingNum']
-                OrderNumber = row['OrderNumber']
-            track_api = TrackAPI()
-            tracking_id = track_api.postAfterShipTrackingVersion2(tracking_number=TrackingNum)
-            if tracking_id is False:
-                return Response({"error": "Failed to create tracking ID"}, status=status.HTTP_400_BAD_REQUEST)
-            
+            TrackingNum = row["Tracking Number"]
+            OrderNumber = str(row["Reference Number"])[3:]  # remove first 3 chars if needed
+
+            # track_api = TrackAPI()
+            # tracking_id = track_api.postAfterShipTrackingVersion2(tracking_number=TrackingNum)
+            # if tracking_id is False:
+            #     return Response({"error": "Failed to create tracking ID"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Check if tracking number already exists
+            if Tracking.objects.filter(tracking_number=TrackingNum).exists():
+                print(f"Tracking number {TrackingNum} already exists. Skipping.")
+                continue
 
             Tracking.objects.create(
-                tracking_id = tracking_id,
-                tracking_number = TrackingNum,
-                order_number = OrderNumber,
+                tracking_number=TrackingNum,
+                order_number=OrderNumber,
             )
         except KeyError as e:
             print(f"Missing column in row {index}: {e}")
-            continue
+            return False
+        except Exception as e:
+            print(f"Error processing row {index}: {e}")
+            return False
 
     return True
-
-
 
 
 @api_view(['POST'])
