@@ -36,8 +36,11 @@ def create_track_dataset(file_path):
     for index, row in data.iterrows():
         try:
             TrackingNum = row["Tracking Number"]
-            OrderNumber = str(row["Reference Number"])[3:]  # remove first 3 chars if needed
-
+            ref_num = str(row["Reference Number"])
+            if ref_num.startswith("VH-"):
+                OrderNumber = ref_num[3:]  # remove "VH-"
+            else:
+                OrderNumber = ref_num  # keep as is
             # track_api = TrackAPI()
             # tracking_id = track_api.postAfterShipTrackingVersion2(tracking_number=TrackingNum)
             # if tracking_id is False:
