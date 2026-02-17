@@ -114,13 +114,18 @@ def upload_tracking(request):
 def CreateTracking(request):
     data = request.data
     
-    # track_api = TrackAPI()
+    track_api = TrackAPI()
+    # print(data)
     # tracking_id = track_api.postAfterShipTracking(data['tracking_number'])
-    # tracking_id = track_api.postAfterShipTrackingVersion2(data['tracking_number'])
-    # if tracking_id is False:
-    #     return Response({"error": "Failed to create tracking ID"}, status=status.HTTP_400_BAD_REQUEST)
+    print(data['tracking_number'], "Tracking Number")
+    try:
+        tracking_id = track_api.postAfterShipTrackingVersion2(data['tracking_number'])
+    except Exception as e:
+        print("Error creating tracking ID:", e) 
+        return Response({"error": "Failed to create tracking ID"}, status=status.HTTP_400_BAD_REQUEST)
     
-    tracking_id = None
+    # tracking_id = None
+    tracking_id = tracking_id if tracking_id else None
 
     trackCreate = Tracking.objects.create(
         tracking_id = tracking_id,
@@ -285,9 +290,12 @@ def trackingOrderDetails(request, order_number):
         blacklist = BlackListed.objects.all()
         blacklisted_word = [{'word': q.word, 'replace_word': q.replace_word } for q in blacklist]
         track = TrackAPI()
-        # tracking_all_details = track.TrackingOrder(trackingId)
+        print("Tracking Number:", tracking_number)
+        print("type of tracking number:", type(tracking_number))
+        tracking_all_details = track.ship24Tracking(tracking_number)
+        print(tracking_number, "Tracking ID")
         # tracking_all_details = track.AfterShipTrackingVersion2(trackingId)
-        tracking_all_details = track.trackusps(tracking_number)
+        # tracking_all_details = track.trackusps(tracking_number)
         print("---------------------------------------------------------------")
         print("Running USPS Tracking API Now")
         # tracking_all_details = track.AftershipTracking(trackingId)

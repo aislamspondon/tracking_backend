@@ -25,8 +25,9 @@ def convert_timezone(timestamp_str):
 
 class TrackAPI:
     # Ship24 config
+    
     ship24Url = "https://api.ship24.com/public/v1/trackers"
-    ship24ApiKey = "apik_CjnUCgyp4aJBRYbArHGb3kCYeBvYhI"
+    ship24ApiKey = "apik_HGp31VBDpsrQsGV8wD1xO0ZbuljObz"
 
     # AfterShip config
     aftershipUrl = "https://api.aftership.com/v4/trackings"
@@ -79,7 +80,8 @@ class TrackAPI:
             trackerId = tracker['tracker']['trackerId']
 
             # Get tracking results
-            trackerUrl = f"https://api.ship24.com/public/v1/trackers/{trackerId}/results"
+            
+            trackerUrl = f"https://api.ship24.com/public/v1/trackers/search/{trackingNumber}/results"
             track_response = requests.get(trackerUrl, headers=headers)
             track_response_json = track_response.json()
 
@@ -107,6 +109,7 @@ class TrackAPI:
             return delivery
 
         except Exception as e:
+            print(f"Error fetching tracking information: {e}")
             return {"error": str(e)}
 
     def AftershipTracking(self, tracking_number, retry_count=0, max_retries=1):
@@ -318,6 +321,7 @@ class TrackAPI:
             response = requests.post(url, json=payload, headers=headers)
             response_data = response.json()
             print("Tracking created successfully:")
+            print(response_data, "Response Data")
             tracking_id =  response_data.get("data", {}).get("id", False)
             return tracking_id
         except Exception as e:
@@ -361,3 +365,52 @@ class TrackAPI:
             print(response.text)
             print(f"Error parsing response: {e}")
 
+
+    def ship24Tracking(self, tracking_number):
+        headers = {
+            "Authorization": f"Bearer {self.ship24ApiKey}",
+            "Content-Type": "application/json; charset=utf-8"
+        }
+        payload = {"trackingNumber": tracking_number}
+        try:
+            response = requests.post(self.ship24Url, headers=headers, data=json.dumps(payload))
+        except Exception as e:
+            print("------------------------------------Error fetching tracking information------------------------------------")
+            print(f"Error fetching tracking information: {e}")
+
+        url = f"https://api.ship24.com/public/v1/trackers/search/{tracking_number}/results"
+
+        headers = {
+            "Authorization": f"Bearer {self.ship24ApiKey}",
+            "Accept": "application/json"
+        }
+        try:
+            response = requests.get(url, headers=headers)
+        except Exception as e:
+            print("------------------------------------Error fetching tracking information------------------------------------")
+            print(f"Error fetching tracking information: {e}")
+        if not response.ok:
+            return {
+                "error": "Ship24 error",
+                "status": response.status_code,
+                "body": response.text
+            }
+        print("---------------------------------------------------------------Response from Ship24 API---------------------------------------------------------------")
+        response_json = response.json()
+        status = response_json['data']['trackings'][0]
+        all_track_status = status['events']
+        estimatedDate = status['shipment']['delivery']['estimatedDeliveryDate']
+        eventStatus = [
+            {
+                'status': track_status['status'],
+                'date': track_status['datetime'],
+                'location': track_status['location']
+            }
+            for track_status in all_track_status
+        ]
+        delivery = {
+            'estimateDelivery': estimatedDate,
+            'status': eventStatus
+        }
+        print(delivery, "Delivery Object")
+        return delivery
