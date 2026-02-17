@@ -403,7 +403,7 @@ class TrackAPI:
         eventStatus = [
             {
                 'status': track_status['status'],
-                'date': track_status['datetime'],
+                'date': convert_timezone(track_status.get('datetime', None)),
                 'location': track_status['location']
             }
             for track_status in all_track_status
