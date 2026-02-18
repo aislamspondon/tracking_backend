@@ -296,18 +296,40 @@ def trackingOrderDetails(request, order_number):
         # print(tracking_number, "Tracking ID")
         # tracking_all_details = track.AfterShipTrackingVersion2(trackingId)
         tracking_all_details = track.trackusps(tracking_number)
+
         print("---------------------------------------------------------------")
         print("Running USPS Tracking API Now")
-        # tracking_all_details = track.AftershipTracking(trackingId)
         print("---------------------------------------------------------------")
         print("Tracking All Details:", tracking_all_details)
-        if 'status' in tracking_all_details:
-            tracking_status = tracking_all_details['status']
-            print("Tracking Status:", tracking_status)
-        else:
-            print("No tracking status available")
-            # Handle the case where status is not available
-            return Response({"message": "No tracking status available"}, status=status.HTTP_404_NOT_FOUND)
+
+        # 1) None check
+        if tracking_all_details is None:
+            return Response(
+                {"message": "Tracking service returned no data (None)."},
+                status=status.HTTP_502_BAD_GATEWAY
+            )
+
+        # 2) Type check (must be dict-like)
+        if not isinstance(tracking_all_details, dict):
+            return Response(
+                {
+                    "message": "Unexpected tracking response format.",
+                    "received_type": type(tracking_all_details).__name__,
+                    "received_value": str(tracking_all_details)[:300],
+                },
+                status=status.HTTP_502_BAD_GATEWAY
+            )
+
+        # 3) Safe key access
+        tracking_status = tracking_all_details.get("status")
+        if not tracking_status:
+            return Response(
+                {"message": "No tracking status available", "details": tracking_all_details},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        print("Tracking Status:", tracking_status)
+
         # print("this is nothing to do ")
         # tracking_location = tracking_all_details['location']
         # print(tracking_location)
