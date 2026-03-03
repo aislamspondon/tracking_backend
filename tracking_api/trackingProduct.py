@@ -27,8 +27,8 @@ class TrackAPI:
     # Ship24 config
     
     ship24Url = "https://api.ship24.com/public/v1/trackers"
-    ship24ApiKey = "apik_HGp31VBDpsrQsGV8wD1xO0ZbuljObz"
-    # ship24ApiKey = "apik_nkuEV0xIK7H9KVjrNIoTqAs6j7jJFV"
+    # ship24ApiKey = "apik_HGp31VBDpsrQsGV8wD1xO0ZbuljObz"
+    ship24ApiKey = "apik_5kv2pu439XTnBsuY93thdj9kOevPUU"
 
     # AfterShip config
     aftershipUrl = "https://api.aftership.com/v4/trackings"
@@ -367,54 +367,130 @@ class TrackAPI:
             print(f"Error parsing response: {e}")
 
 
-    def ship24Tracking(self, tracking_number):
-        headers = {
-            "Authorization": f"Bearer {self.ship24ApiKey}",
-            "Content-Type": "application/json; charset=utf-8"
-        }
-        payload = {"trackingNumber": tracking_number}
-        try:
-            response = requests.post(self.ship24Url, headers=headers, data=json.dumps(payload))
-        except Exception as e:
-            print("------------------------------------Error fetching tracking information------------------------------------")
-            print(f"Error fetching tracking information: {e}")
+    # def ship24Tracking(self, tracking_number):
+    #     headers = {
+    #         "Authorization": f"Bearer {self.ship24ApiKey}",
+    #         "Content-Type": "application/json; charset=utf-8"
+    #     }
+    #     payload = {"trackingNumber": tracking_number}
+    #     try:
+    #         response = requests.post(self.ship24Url, headers=headers, data=json.dumps(payload))
+    #     except Exception as e:
+    #         print("------------------------------------Error fetching tracking information------------------------------------")
+    #         print(f"Error fetching tracking information: {e}")
 
-        url = f"https://api.ship24.com/public/v1/trackers/search/{tracking_number}/results"
+    #     url = f"https://api.ship24.com/public/v1/trackers/search/{tracking_number}/results"
 
-        headers = {
-            "Authorization": f"Bearer {self.ship24ApiKey}",
-            "Accept": "application/json"
-        }
-        try:
-            response = requests.get(url, headers=headers)
-        except Exception as e:
-            print("------------------------------------Error fetching tracking information------------------------------------")
-            print(f"Error fetching tracking information: {e}")
-        if not response.ok:
-            print("Error fetching tracking information:", response.text)
-            return {"status" : False, "message": response.text}
+    #     headers = {
+    #         "Authorization": f"Bearer {self.ship24ApiKey}",
+    #         "Accept": "application/json"
+    #     }
+    #     try:
+    #         response = requests.get(url, headers=headers)
+    #     except Exception as e:
+    #         print("------------------------------------Error fetching tracking information------------------------------------")
+    #         print(f"Error fetching tracking information: {e}")
+    #     if not response.ok:
+    #         print("Error fetching tracking information:", response.text)
+    #         return {"status" : False, "message": response.text}
         
-        if response.status_code != 200:
-            print("Error fetching tracking information:", response.text)
-            return {"status" : False, "message": response.text}
-        print("Status Code:", response.status_code)
-        print("Response ok means", response.ok)
-        print("---------------------------------------------------------------Response from Ship24 API---------------------------------------------------------------")
-        response_json = response.json()
-        status = response_json['data']['trackings'][0]
-        all_track_status = status['events']
-        estimatedDate = status['shipment']['delivery']['estimatedDeliveryDate']
-        eventStatus = [
-            {
-                'status': track_status['status'],
-                'date': convert_timezone(track_status.get('datetime', None)),
-                'location': track_status['location']
-            }
-            for track_status in all_track_status
-        ]
-        delivery = {
-            'estimateDelivery': estimatedDate,
-            'status': eventStatus
+    #     if response.status_code != 200:
+    #         print("Error fetching tracking information:", response.text)
+    #         return {"status" : False, "message": response.text}
+    #     print("Status Code:", response.status_code)
+    #     print("Response ok means", response.ok)
+    #     print("---------------------------------------------------------------Response from Ship24 API---------------------------------------------------------------")
+    #     response_json = response.json()
+    #     status = response_json['data']['trackings'][0]
+    #     all_track_status = status['events']
+    #     estimatedDate = status['shipment']['delivery']['estimatedDeliveryDate']
+    #     eventStatus = [
+    #         {
+    #             'status': track_status['status'],
+    #             'date': convert_timezone(track_status.get('datetime', None)),
+    #             'location': track_status['location']
+    #         }
+    #         for track_status in all_track_status
+    #     ]
+    #     delivery = {
+    #         'estimateDelivery': estimatedDate,
+    #         'status': eventStatus
+    #     }
+    #     print(delivery, "Delivery Object")
+    #     return delivery
+
+
+    def ship24Tracking(self, tracking_number, origin_cc="GB", destination_cc=None,
+                    destination_postcode=None, shipping_date=None, courier_codes=None):
+        """
+        Ship24 Per-calls endpoint:
+        POST https://api.ship24.com/public/v1/tracking/search
+
+        shipping_date example: "2026-01-01T00:00:00.000Z"
+        courier_codes example: ["royal-mail", "dhl"]
+        """
+
+        url = "https://api.ship24.com/public/v1/tracking/search"
+
+        headers = {
+            "Authorization": f"Bearer {self.ship24ApiKey}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
         }
-        print(delivery, "Delivery Object")
-        return delivery
+
+        payload = {
+            "trackingNumber": tracking_number,
+        }
+
+        # Optional fields (only add if provided)
+        if origin_cc:
+            payload["originCountryCode"] = origin_cc
+        if destination_cc:
+            payload["destinationCountryCode"] = destination_cc
+        if destination_postcode:
+            payload["destinationPostCode"] = destination_postcode
+        if shipping_date:
+            payload["shippingDate"] = shipping_date
+        if courier_codes is not None:
+            payload["courierCode"] = courier_codes  # Ship24 expects an array
+
+        try:
+            response = requests.post(url, headers=headers, json=payload, timeout=30)
+        except requests.RequestException as e:
+            return {"status": False, "message": f"Ship24 request failed: {str(e)}"}
+
+        # Handle non-200 responses safely
+        if not response.ok:
+            return {"status": False, "message": response.text}
+
+        try:
+            data = response.json()
+        except ValueError:
+            return {"status": False, "message": f"Invalid JSON from Ship24: {response.text}"}
+
+        # Ship24 response parsing (safe)
+        trackings = (data.get("data") or {}).get("trackings") or []
+        if not trackings:
+            return {"status": False, "message": f"No tracking data returned: {data}"}
+
+        first = trackings[0] or {}
+        events = first.get("events") or []
+
+        # estimatedDeliveryDate may or may not exist
+        estimated_date = None
+        shipment = first.get("shipment") or {}
+        delivery = (shipment.get("delivery") or {})
+        estimated_date = delivery.get("estimatedDeliveryDate")
+
+        eventStatus = []
+        for ev in events:
+            eventStatus.append({
+                "status": ev.get("status"),
+                "date": convert_timezone(ev.get("datetime")),  # your function
+                "location": ev.get("location"),
+            })
+
+        return {
+            "status": eventStatus,
+            "estimateDelivery": estimated_date,
+        }
