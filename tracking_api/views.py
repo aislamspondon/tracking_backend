@@ -292,15 +292,21 @@ def trackingOrderDetails(request, order_number):
         track = TrackAPI()
         print("Tracking Number:", tracking_number)
         print("type of tracking number:", type(tracking_number))
-        # tracking_all_details = track.ship24Tracking(tracking_number)
+        tracking_all_details = track.ship24Tracking(tracking_number)
         # print(tracking_number, "Tracking ID")
         # tracking_all_details = track.AfterShipTrackingVersion2(trackingId)
-        tracking_all_details = track.trackusps(tracking_number)
+        # tracking_all_details = track.trackusps(tracking_number)
 
         print("---------------------------------------------------------------")
         print("Running USPS Tracking API Now")
         print("---------------------------------------------------------------")
         print("Tracking All Details:", tracking_all_details)
+
+        if not tracking_all_details['status']:
+            return Response(
+                {"message": tracking_all_details['message']},
+                status=status.HTTP_502_BAD_GATEWAY
+            )
 
         # 1) None check
         if tracking_all_details is None:

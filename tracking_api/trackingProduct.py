@@ -28,6 +28,7 @@ class TrackAPI:
     
     ship24Url = "https://api.ship24.com/public/v1/trackers"
     ship24ApiKey = "apik_HGp31VBDpsrQsGV8wD1xO0ZbuljObz"
+    # ship24ApiKey = "apik_nkuEV0xIK7H9KVjrNIoTqAs6j7jJFV"
 
     # AfterShip config
     aftershipUrl = "https://api.aftership.com/v4/trackings"
@@ -390,11 +391,14 @@ class TrackAPI:
             print("------------------------------------Error fetching tracking information------------------------------------")
             print(f"Error fetching tracking information: {e}")
         if not response.ok:
-            return {
-                "error": "Ship24 error",
-                "status": response.status_code,
-                "body": response.text
-            }
+            print("Error fetching tracking information:", response.text)
+            return {"status" : False, "message": response.text}
+        
+        if response.status_code != 200:
+            print("Error fetching tracking information:", response.text)
+            return {"status" : False, "message": response.text}
+        print("Status Code:", response.status_code)
+        print("Response ok means", response.ok)
         print("---------------------------------------------------------------Response from Ship24 API---------------------------------------------------------------")
         response_json = response.json()
         status = response_json['data']['trackings'][0]
