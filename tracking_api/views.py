@@ -303,18 +303,20 @@ def trackingOrderDetails(request, order_number):
         print("Tracking All Details:", tracking_all_details)
 
         # 1️⃣ Check None FIRST
-        if tracking_all_details is None:
+        if not tracking_all_details:
             return Response(
-                {"message": "Tracking service returned no data (None)."},
+                {"message": "Tracking service returned empty response."},
                 status=status.HTTP_502_BAD_GATEWAY
             )
 
-        # 2️⃣ Safe access using .get()
-        if not tracking_all_details.get('status'):
-            return Response(
-                {"message": tracking_all_details.get('message', 'Unknown tracking error')},
-                status=status.HTTP_502_BAD_GATEWAY
+        if not tracking_all_details.get("status", False):
+            msg = (
+                tracking_all_details.get("message")
+                or tracking_all_details.get("error")
+                or tracking_all_details.get("detail")
+                or "Tracking service error."
             )
+            return Response({"message": msg}, status=status.HTTP_502_BAD_GATEWAY)
 
         # 2) Type check (must be dict-like)
         if not isinstance(tracking_all_details, dict):
