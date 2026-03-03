@@ -302,16 +302,17 @@ def trackingOrderDetails(request, order_number):
         print("---------------------------------------------------------------")
         print("Tracking All Details:", tracking_all_details)
 
-        if not tracking_all_details['status']:
-            return Response(
-                {"message": tracking_all_details['message']},
-                status=status.HTTP_502_BAD_GATEWAY
-            )
-
-        # 1) None check
+        # 1️⃣ Check None FIRST
         if tracking_all_details is None:
             return Response(
                 {"message": "Tracking service returned no data (None)."},
+                status=status.HTTP_502_BAD_GATEWAY
+            )
+
+        # 2️⃣ Safe access using .get()
+        if not tracking_all_details.get('status'):
+            return Response(
+                {"message": tracking_all_details.get('message', 'Unknown tracking error')},
                 status=status.HTTP_502_BAD_GATEWAY
             )
 
