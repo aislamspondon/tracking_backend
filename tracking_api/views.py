@@ -314,7 +314,7 @@ def trackingOrderDetails(request, order_number):
                 tracking_all_details.get("message")
                 or tracking_all_details.get("error")
                 or tracking_all_details.get("detail")
-                or "Tracking service error."
+                or "Tracking Service Searching ... please wait for a moment"
             )
             return Response({"message": msg}, status=status.HTTP_502_BAD_GATEWAY)
 
